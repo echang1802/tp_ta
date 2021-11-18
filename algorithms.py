@@ -1,4 +1,6 @@
+
 from region import Planilla
+from neighbors import neighborhood
 import random
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -15,8 +17,8 @@ def cubrir_rutas_random(region):
 # Algoritmo de backtraking
 def cubrir_rutas_backtracking(region):
     # Definimos la planilla e iniciamos el algoritmo.
-    sol = Planilla(region)
-    return backtracking_aux(sol)
+    solution = Planilla(region)
+    return backtracking_aux(solution)
 
 def backtracking_aux(plan):
     # Caso base, cubrimos el 100% de la region.
@@ -35,13 +37,34 @@ def backtracking_aux(plan):
         plan.sacar_agente(ae)
     return best_solution
 
-#
-#def cubrir_rutas_greedy(region):
-# COMPLETAR
-#
-#def cubrir_rutas_bl(solucion_inicial):
-# COMPLETAR
-#
-#def cubrir_rutas_bli(region, iter):
-# COMPLETAR
-#
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def cubrir_rutas_greedy():
+    pass
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Algoritmo de busqueda local
+def cubrir_rutas_bl(solucion_inicial):
+    ready = False
+    while not ready:
+        neighbors = neighborhood(solucion_inicial)
+        if neighbors.total_neighbors() == 0: # Sino se consiguen vecinos
+            return solucion_inicial          # devolvemos la ultima solucion
+        best_neightbor = neighbors.select_best_neightbor()
+        ready = not best_neightbor > solucion_inicial # Paramos si el mejor
+        solucion_inicial = best_neightbor.copy()      # vecino no es mejor que
+    return solucion_inicial                           # la solucion actual
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Algoritmo de busqueda local iterativa
+def cubrir_rutas_bli(region, iter):
+    best_solution = cubrir_rutas_random(region)
+    for iteration in range(iter):
+        solution = cubrir_rutas_bl(best_solution)
+        if solution > best_solution:
+            best_solution = solution.copy()
+    return best_solution
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
