@@ -146,6 +146,6 @@ class Planilla:
     # Define que una solución es mayor a otra si tiene una mayor cantidad
     # de rutas duplicadas
     def __gt__(self, other):
-        if len(self._aeropuertos_con_agentes) < len(other._aeropuertos_con_agentes):
-            return True
-        return self._total_rutas_duplicadas() > other._total_rutas_duplicadas()
+        if self.cant_agentes() == other.cant_agentes():
+            return self._total_rutas_duplicadas() > other._total_rutas_duplicadas()
+        return self.cant_agentes() < other.cant_agentes()
