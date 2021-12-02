@@ -40,28 +40,22 @@ def backtracking_aux(plan):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def cubrir_rutas_greedy(region, degrees = 1):
-    solution = Planilla(region)
-    ready = False
-    while not ready:
-        airport_to_add = [None] * degrees
-        covers = [0] * degrees
-        worst_cover = 0
-        worst_cover_index = 0
-        for airport in solution.aeropuertos_sin_agentes():
-            solution.poner_agente(airport)
-            if solution.cubrimiento() > worst_cover:
-                airport_to_add[worst_cover_index] = airport
-                covers[worst_cover_index] = solution.cubrimiento()
-                worst_cover = 1
-                for i in range(degrees):
-                    if worst_cover < covers[i]:
-                        worst_cover = covers[i]
-                        worst_cover_index = i
-            solution.sacar_agente(airport)
-        solution.poner_agente(random.choice(airport_to_add))
-        ready = solution.cubrimiento() == 1
-    return solution
+def cubrir_rutas_greedy(region):
+    solucion = Planilla(region)
+    rutas_greedy = []
+    for i, (a, b) in enumerate(region.rutas):
+        rutas_greedy.append(a)
+        rutas_greedy.append(b)
+    aeropuertos_distintos = set(rutas_greedy)
+    while solucion.cubrimiento() < 1:
+        aeropuertos_repetidos = dict()
+        for x in aeropuertos_distintos:
+            aeropuertos_repetidos[x] = rutas_greedy.count(x)
+        ae = max(aeropuertos_repetidos, key=aeropuertos_repetidos.get)
+        aeropuertos_distintos.remove(ae)
+        aeropuertos_repetidos.pop(ae)
+        solucion.poner_agente(ae)
+    return solucion
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -83,7 +77,7 @@ def cubrir_rutas_bl(solucion_inicial):
 def cubrir_rutas_bli(region, iter):
     best_solution = cubrir_rutas_random(region)
     for iteration in range(iter):
-        solution = cubrir_rutas_bl(best_solution)
+        solution = cubrir_rutas_bl(cubrir_rutas_random(region))
         if solution > best_solution:
             best_solution = solution.copy()
     return best_solution
@@ -92,12 +86,35 @@ def cubrir_rutas_bli(region, iter):
 
 # Algoritmo grasp
 def cubrir_rutas_grasp(region, degrees, iter):
-    best_solution = cubrir_rutas_greedy(region, degrees)
+    best_solution = cubrir_rutas_greedy_with_degrees(region, degrees)
     for iteration in range(iter):
-        solution = cubrir_rutas_bl(best_solution)
+        solution = cubrir_rutas_bl(cubrir_rutas_greedy_with_degrees(region, degrees))
         if solution > best_solution:
             best_solution = solution.copy()
     return best_solution
+
+def cubrir_rutas_greedy_with_degrees(region, degrees = 1):
+    solution = Planilla(region)
+    ready = False
+    while not ready:
+        airport_to_add = [None] * degrees
+        covers = [0] * degrees
+        worst_cover = 0
+        worst_cover_index = 0
+        for airport in solution.aeropuertos_sin_agentes():
+            solution.poner_agente(airport)
+            if solution.cubrimiento() > worst_cover:
+                airport_to_add[worst_cover_index] = airport
+                covers[worst_cover_index] = solution.cubrimiento()
+                worst_cover = 0
+                for i in range(degrees):
+                    if worst_cover < covers[i]:
+                        worst_cover = covers[i]
+                        worst_cover_index = i
+            solution.sacar_agente(airport)
+        solution.poner_agente(random.choice(airport_to_add))
+        ready = solution.cubrimiento() == 1
+    return solution
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

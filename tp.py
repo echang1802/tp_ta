@@ -25,7 +25,7 @@ algorithms = {
 # Funcion auxiliar para la detencion despues de la hora de procesamiento
 def apply_algorithm(region, algorithm, solution, iterations, degrees):
     if algorithm == "greedy":
-        solution["best"] = algorithms[algorithm](region, degrees)
+        solution["best"] = algorithms[algorithm](region)
     elif algorithm == "busqueda_local":
         starting_solution = cubrir_rutas_random(region)
         solution["best"] = algorithms[algorithm](starting_solution)
